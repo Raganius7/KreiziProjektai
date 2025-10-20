@@ -1,0 +1,7 @@
+#include <Arduino.h>
+
+void setup () {
+    serial.println("pasidaryk pats")
+    serial.println("123")
+    serial.println("pasidaryk pats")
+}
