@@ -1,0 +1,90 @@
+from picarx import Picarx
+from time import sleep
+import readchar
+
+manual = '''
+Press keys on keyboard to control PiCar-X!
+    w: Forward
+    a: Turn left (forward)
+    s: Backward
+    d: Turn right (forward)
+    i: Head up
+    k: Head down
+    j: Turn head left
+    l: Turn head right
+    x: Stop
+    ctrl+c: Quit
+'''
+
+def show_info():
+    print("\033[H\033[J", end='')  # clear terminal window
+    print(manual)
+
+
+if _name_ == "_main_":
+    px = None
+    try:
+        pan_angle = 0
+        tilt_angle = 0
+        speed = 80  # galite keisti greitį čia
+        px = Picarx()
+        show_info()
+
+        while True:
+            key = readchar.readkey()
+            key = key.lower()
+
+            # Važiavimas
+            if key in ('w', 's', 'a', 'd', 'x'):
+                if key == 'w':          # tiesiai pirmyn
+                    px.set_dir_servo_angle(0)
+                    px.forward(speed)
+                elif key == 's':        # atgal
+                    px.set_dir_servo_angle(0)
+                    px.backward(speed)
+                elif key == 'a':        # kairė + pirmyn
+                    px.set_dir_servo_angle(-35)
+                    px.forward(speed)
+                elif key == 'd':        # dešinė + pirmyn
+                    px.set_dir_servo_angle(35)
+                    px.forward(speed)
+                elif key == 'x':        # STOP
+                    px.stop()
+
+                show_info()
+
+            # Kamera
+            elif key in ('i', 'k', 'j', 'l'):
+                if key == 'i':
+                    tilt_angle += 5
+                    if tilt_angle > 35:
+                        tilt_angle = 35
+                elif key == 'k':
+                    tilt_angle -= 5
+                    if tilt_angle < -35:
+                        tilt_angle = -35
+                elif key == 'l':
+                    pan_angle += 5
+                    if pan_angle > 35:
+                        pan_angle = 35
+                elif key == 'j':
+                    pan_angle -= 5
+                    if pan_angle < -35:
+                        pan_angle = -35
+
+                px.set_cam_tilt_angle(tilt_angle)
+                px.set_cam_pan_angle(pan_angle)
+                show_info()
+
+            # Išėjimas
+            elif key == readchar.key.CTRL_C:
+                print("\n Quit")
+                break
+
+    finally:
+        if px is not None:
+            px.set_cam_tilt_angle(0)
+            px.set_cam_pan_angle(0)
+            px.set_dir_servo_angle(0)
+            px.stop()
+            sleep(0.2)
